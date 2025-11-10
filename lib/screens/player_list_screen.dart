@@ -11,6 +11,7 @@ class PlayerListScreen extends StatefulWidget {
 class _PlayerListScreenState extends State<PlayerListScreen> {
   final supabase = Supabase.instance.client;
   List<dynamic> players = [];
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -19,17 +20,28 @@ class _PlayerListScreenState extends State<PlayerListScreen> {
   }
 
   Future<void> _loadPlayers() async {
-    final response = await supabase.from('players').select().limit(50);
-    setState(() {
-      players = response;
-    });
+    try {
+      final response = await supabase
+          .from('players')
+          .select()
+          .filter('position', 'in', ['QB', 'RB', 'WR', 'TE'])
+          .limit(50);
+
+      setState(() {
+        players = response;
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading players: $e');
+      setState(() => isLoading = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Players')),
-      body: players.isEmpty
+      body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
               itemCount: players.length,
@@ -38,7 +50,8 @@ class _PlayerListScreenState extends State<PlayerListScreen> {
                 return ListTile(
                   title: Text(player['name']),
                   subtitle: Text(player['team'] ?? 'Unknown Team'),
-                  trailing: Text(player['position'] ?? ''),
+                  trailing: Text(
+                      player['fantasy_points']?.toStringAsFixed(1) ?? '0'),
                 );
               },
             ),

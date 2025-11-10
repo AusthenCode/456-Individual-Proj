@@ -63,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     final p = players[index];
                     return ListTile(
                       title: Text('${p.name} (${p.position}) - ${p.team}'),
-                      subtitle: Text('Value: ${p.tradeValue}'),
+                      subtitle: Text('Value: ${p.baseValue}'),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
