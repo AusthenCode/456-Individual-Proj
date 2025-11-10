@@ -1,0 +1,14 @@
+{
+  "name": "fantasy-trade-calculator",
+  "version": "1.0.0",
+  "description": "Fantasy Football Trade Calculator with Sleeper API and Supabase integration",
+  "main": "updatePlayers.js",
+  "type": "module",
+  "scripts": {
+    "update": "node updatePlayers.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.81.0",
+    "node-fetch": "^3.3.2"
+  }
+}
