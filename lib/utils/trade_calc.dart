@@ -2,7 +2,7 @@ import '../models/player.dart';
 
 class TradeCalculator {
   static double calculateTotal(List<Player> players) {
-    return players.fold(0, (sum, p) => sum + p.tradeValue);
+    return players.fold(0, (sum, p) => sum + p.value);
   }
 
   static String compareTrades(List<Player> teamA, List<Player> teamB) {

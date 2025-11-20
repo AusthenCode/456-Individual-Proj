@@ -1,6 +1,5 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/player.dart';
 import '../utils/trade_calc.dart';
 
@@ -12,6 +11,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final supabase = Supabase.instance.client;
   late Future<List<Player>> futurePlayers;
   List<Player> teamA = [];
   List<Player> teamB = [];
@@ -22,10 +22,19 @@ class _HomeScreenState extends State<HomeScreen> {
     futurePlayers = loadPlayers();
   }
 
+  /// Load all players from Supabase
   Future<List<Player>> loadPlayers() async {
-    final String response = await rootBundle.loadString('lib/data/players.json');
-    final data = jsonDecode(response) as List;
-    return data.map((p) => Player.fromJson(p)).toList();
+    try {
+      final data = await supabase
+          .from('players')
+          .select()
+          .order('value', ascending: false) as List<dynamic>;
+
+      return data.map((p) => Player.fromJson(p as Map<String, dynamic>)).toList();
+    } catch (e) {
+      debugPrint('Error fetching players: $e');
+      return [];
+    }
   }
 
   void compareTrade() {
@@ -36,7 +45,10 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text("Trade Result"),
         content: Text(result),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("OK"))
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("OK"),
+          ),
         ],
       ),
     );
@@ -49,11 +61,14 @@ class _HomeScreenState extends State<HomeScreen> {
       body: FutureBuilder<List<Player>>(
         future: futurePlayers,
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
 
-          final players = snapshot.data!;
+          final players = snapshot.data ?? [];
           return Column(
             children: [
               Expanded(
@@ -63,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     final p = players[index];
                     return ListTile(
                       title: Text('${p.name} (${p.position}) - ${p.team}'),
-                      subtitle: Text('Value: ${p.tradeValue}'),
+                      subtitle: Text('Value: ${p.value}'),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
