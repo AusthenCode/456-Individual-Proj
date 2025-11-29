@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/player.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class PlayerListScreen extends StatefulWidget {
@@ -10,48 +11,38 @@ class PlayerListScreen extends StatefulWidget {
 
 class _PlayerListScreenState extends State<PlayerListScreen> {
   final supabase = Supabase.instance.client;
-  List<dynamic> players = [];
-  bool isLoading = true;
+  List<Player> players = [];
 
   @override
   void initState() {
     super.initState();
-    _loadPlayers();
+    loadPlayers();
   }
 
-  Future<void> _loadPlayers() async {
+  Future<void> loadPlayers() async {
     try {
-      final response = await supabase
-          .from('players')
-          .select()
-          .filter('position', 'in', ['QB', 'RB', 'WR', 'TE'])
-          .limit(50);
-
+      final data = await supabase.from('players').select() as List<dynamic>;
       setState(() {
-        players = response;
-        isLoading = false;
+        players = data.map((p) => Player.fromJson(p as Map<String, dynamic>)).toList();
       });
     } catch (e) {
-      print('Error loading players: $e');
-      setState(() => isLoading = false);
+      debugPrint('Error loading players: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Players')),
-      body: isLoading
+      appBar: AppBar(title: const Text('All Players')),
+      body: players.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
               itemCount: players.length,
               itemBuilder: (context, index) {
-                final player = players[index];
+                final p = players[index];
                 return ListTile(
-                  title: Text(player['name']),
-                  subtitle: Text(player['team'] ?? 'Unknown Team'),
-                  trailing: Text(
-                      player['fantasy_points']?.toStringAsFixed(1) ?? '0'),
+                  title: Text('${p.name} (${p.position})'),
+                  subtitle: Text('${p.team} - Value: ${p.value}'),
                 );
               },
             ),

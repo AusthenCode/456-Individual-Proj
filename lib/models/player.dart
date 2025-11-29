@@ -1,61 +1,37 @@
 class Player {
+  final int id;
   final String name;
-  final String team;
   final String position;
-  final double baseValue;      // The value from Supabase
-  final int rank;              // Overall rank
-  final int positionRank;      // Rank within their position (e.g., RB11)
+  final String team;
+  final double value;
 
   Player({
+    required this.id,
     required this.name,
-    required this.team,
     required this.position,
-    required this.baseValue,
-    required this.rank,
-    required this.positionRank,
+    required this.team,
+    required this.value,
   });
 
-  // Factory to create a Player from Supabase JSON
+  // Factory method to create a Player from JSON or DB row
   factory Player.fromJson(Map<String, dynamic> json) {
     return Player(
+      id: json['id'] ?? 0,
       name: json['name'] ?? 'Unknown',
-      team: json['team'] ?? 'Unknown',
       position: json['position'] ?? '',
-      baseValue: (json['base_value'] ?? 0).toDouble(),
-      rank: json['rank'] ?? 0,
-      positionRank: json['position_rank'] ?? 0,
+      team: json['team'] ?? '',
+      value: (json['value'] ?? 0).toDouble(),
     );
   }
 
-  // Convert Player object to JSON for Supabase inserts/updates
+  // Convert Player object to JSON for SQLite insert or API usage
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'name': name,
-      'team': team,
       'position': position,
-      'base_value': baseValue,
-      'rank': rank,
-      'position_rank': positionRank,
+      'team': team,
+      'value': value,
     };
   }
-
-  double calculateFantasyPoints(Map<String, dynamic> player) {
-  final position = player['position'];
-  double points = 0.0;
-
-  if (position == 'QB') {
-    points += (player['passing_yards'] ?? 0) / 25;
-    points += (player['passing_tds'] ?? 0) * 4;
-    points -= (player['interceptions'] ?? 0) * 2;
-  } else if (['RB', 'WR', 'TE'].contains(position)) {
-    points += (player['rushing_yards'] ?? 0) / 10;
-    points += (player['receiving_yards'] ?? 0) / 10;
-    points += (player['rushing_tds'] ?? 0) * 6;
-    points += (player['receiving_tds'] ?? 0) * 6;
-    points += (player['receptions'] ?? 0) * 1; // PPR
-  }
-
-    return points;
-  }
-
 }
