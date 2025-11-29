@@ -1,37 +1,39 @@
 class Player {
   final int id;
   final String name;
-  final String position;
-  final String team;
-  final double value;
+  final String team;        // You said this is correct now
+  final String position;    // Corrected (no longer swapped)
+  final int value;
+  final int positionRank;
 
   Player({
     required this.id,
     required this.name,
-    required this.position,
     required this.team,
+    required this.position,
     required this.value,
+    required this.positionRank,
   });
 
-  // Factory method to create a Player from JSON or DB row
   factory Player.fromJson(Map<String, dynamic> json) {
     return Player(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? 'Unknown',
-      position: json['position'] ?? '',
-      team: json['team'] ?? '',
-      value: (json['value'] ?? 0).toDouble(),
+      id: json['id'],
+      name: json['name'],
+      team: json['team'],
+      position: json['position'],
+      value: json['value'],
+      positionRank: json['position_rank'],
     );
   }
 
-  // Convert Player object to JSON for SQLite insert or API usage
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'name': name,
-      'position': position,
       'team': team,
+      'position': position,
       'value': value,
+      'position_rank': positionRank,
     };
   }
 }
