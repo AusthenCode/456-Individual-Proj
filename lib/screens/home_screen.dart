@@ -108,6 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             // Search bar
             TextField(
+              key: teamNumber == 1 ? const Key('team1_search') : const Key('team2_search'),
               controller: controller,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
